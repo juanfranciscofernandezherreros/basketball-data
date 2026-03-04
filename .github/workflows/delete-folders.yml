@@ -1,0 +1,30 @@
+name: Delete Folders
+
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-folders:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Remove all top-level directories (except .github and .git)
+        run: |
+          find . -maxdepth 1 -mindepth 1 -type d ! -name '.github' ! -name '.git' -exec rm -rf {} +
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No folders to delete."
+          else
+            git commit -m "chore: remove all top-level folders from repository"
+            git push
+          fi
