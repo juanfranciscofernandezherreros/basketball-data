@@ -1,0 +1,40 @@
+name: Notify on Commit
+
+# Sends an email whenever a commit is pushed to any branch.
+# Required repository secrets:
+#   MAIL_SERVER    - SMTP server address (e.g. smtp.gmail.com)
+#   MAIL_PORT      - SMTP server port (e.g. 465 or 587)
+#   MAIL_USERNAME  - SMTP login username / sender address
+#   MAIL_PASSWORD  - SMTP login password or app password
+#   MAIL_RECIPIENT - Destination email address
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@ba302ba66e88942841281c984a6b31ca6d6289e6  # v11
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "New commit in ${{ github.repository }}"
+          to: ${{ secrets.MAIL_RECIPIENT }}
+          from: ${{ secrets.MAIL_USERNAME }}
+          body: |
+            A new commit has been pushed to the repository.
+
+            Repository: ${{ github.repository }}
+            Branch:     ${{ github.ref_name }}
+            Commit:     ${{ github.sha }}
+            Author:     ${{ github.actor }}
+            Message:    ${{ github.event.head_commit.message }}
+
+            View the commit: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
